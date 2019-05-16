@@ -60,9 +60,12 @@ This set of tools is designed to extract domain-specific parallel corpora from a
 ## Installation
 >TODO
 >- Installion and final code uploaded shortly.
+
 ## Processes and Tools
 ---------
 Each tool can be run independently to update data or to rerun a step if needed without rerunning the entire process. 
+
+All tools and default configuration files reside in the installation folder. 
 
 ### Full Process
 ![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/Process3.jpg "Process")
@@ -282,8 +285,9 @@ ScorePoolData.py -dn automotive -sl en -tl de -dmd /data/
 Once scores have been processed, data can be extracted with different extract score thresholds using `ExtractMatchedDomainData.py`.
 
 ### ExtractMatchedDomainData.py
-
+```sh
 ExtractMatchedDomainData.py -dn {domain_name} -sl {source_language} -tl {target_language} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
+```
 
 *Arguments*
 - `-dn` The name of the domain that you are training the model for. This is used only for the purpose of labeling and identifying the data that is matched.
@@ -316,16 +320,29 @@ ExtractMatchedDomainData.py -dn automotive -sl en -tl de -dmd /data/ -est 0.5
 The configuration file determines constant elements within the processing such as paths and dependency tools for tokenizing and model training.
 ```json
 {
-	"TokenizerCMD" : "/opt/mosesdecoder/scripts/tokenizer/tokenizer.perl -l %langID  -threads 4 < %input_item >  %output_item ",
+	"TokenizerCMD" : "/opt/mosesdecoder/scripts/tokenizer/tokenizer.perl -l %lang  -threads 4 < %input_file_path >  %output_file_path ",
 	"KenLM" : "/opt/send2/Data_Sentences/kenlm/",
 	"nGram" : "5",
-	"PoolDataRootPath" : "/xxxx/xxx/xx/",
-	"LogPath" : "/xxx/"
+	"PoolDataRootPath" : "/domainadaptation/data/pool/",
+	"LogPath" : "/domainadaptation/logs/"
 }
+
+*Parameters*
+- `-TokenizerCMD` The full path to the tokenizer to be used. The variable names that can be passed through the tools to the tokenizer are as follows:
+  - `%lang` - The tokenization language.
+  - `%input_file_path` - The path to the input file that is to be tokenized.
+  - `%output_file_path` - The path to the tokenized output file.
+- `KenKM` - The path to the KenLM Installation.
+- `PoolDataRootPath` - The path to where the *Pool Data* is stored. 
+- `LogPath` - The path to write log files when processes are run.
 ```
 
+>**Note:**
+>
+>The default configuration file will be loaded automatically by the tools. This file resides in the same folder as the scripts are running. The default configuration file can be overridden by specifing the `-c` argument on any of the tools and providing a path to an alternate configuration file.
+
 ## Pool Data Folder Structure
-The pool data follows a simple structure. Files are stored grouped by language pair and then split into each individual language. Thsi is the same format that ParaCrawl is published in.
+The *Pool Data* follows a simple structure. Files are stored grouped by language pair and then split into each individual language. This is the same format that ParaCrawl is published in. Each file has 1 sentence per line.
 
 * `{pool_data_path}/{source_language}_{target_language}/` - The root folder for the language pair for the overall pool
 * `{pool_data_path}/{source_language}_{target_language}/{source_language}` - The pool files in the source language.
@@ -337,6 +354,10 @@ The pool data follows a simple structure. Files are stored grouped by language p
 /data/pool/en_de/en/myfile.txt
 /data/pool/en_de/de/myfile.txt
 ```
+
+>**Note:**
+>
+>*Pool Data* can be very large. When the *Pool Data* is tokenized, the tokenized data will be at a little bigger than the non-tokenized data due to the spaces added. Ensure that there is enough storage capacity available for this large set of data.
 
 ## Dependancies
 ---------------
@@ -371,4 +392,3 @@ Yes. You can copy the source and target langauge files into the source and targe
 
 #### Can I add more files to the Domain Sample Data over time?
 Yes. Copy the files to the Domain Sample Data folder and then run the tokenize process and train the language model. If you run the Full Process, it will tokenize, train the model and score the data with the new model.
-
