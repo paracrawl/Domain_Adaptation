@@ -326,6 +326,7 @@ The configuration file determines constant elements within the processing such a
 	"PoolDataRootPath" : "/domainadaptation/data/pool/",
 	"LogPath" : "/domainadaptation/logs/"
 }
+```
 
 *Parameters*
 - `-TokenizerCMD` The full path to the tokenizer to be used. The variable names that can be passed through the tools to the tokenizer are as follows:
@@ -335,7 +336,6 @@ The configuration file determines constant elements within the processing such a
 - `KenKM` - The path to the KenLM Installation.
 - `PoolDataRootPath` - The path to where the *Pool Data* is stored. 
 - `LogPath` - The path to write log files when processes are run.
-```
 
 >**Note:**
 >
