@@ -22,10 +22,9 @@
   - [KenLM](#kenlm)
   - [Tokenizer](#tokenizer)
 - [FAQ](#FAQ)
-  
-## Introduction
----------------
 
+----
+## Introduction
 ### What is Domain Adaptation?
 Domain Adaptation in lay terms is the biasing of the training data used to train machine translation (MT) to match the domain of the content being translated higher quality domain-specific translations are produced.
 
@@ -57,12 +56,13 @@ This set of tools is designed to extract domain-specific parallel corpora from a
   * The subset of Pool Data that is determined to be similar to the Domain Sample Data.
   * This data is bilingual and suitable for training a domain specific engine.
 
+----
 ## Installation
 >TODO
 >- Installion and final code uploaded shortly.
 
+----
 ## Processes and Tools
----------
 Each tool can be run independently to update data or to rerun a step if needed without rerunning the entire process. 
 
 All tools and default configuration files reside in the installation folder. 
@@ -181,8 +181,8 @@ The *Pool Data* is processed and stored in the `scores` subfolder.
 ```
 The tool `ExtractDomainData.py` can be run multiple times with different score thresholds to generate different datasets without the need to reprocess the scores.
 
+----
 ## Individual Tools
-------
 ### TokenizeDomainSampleData.py
 Tokenizes the *Domain Sample Data* using the tokenizer specified in the configuration file.
 
@@ -359,16 +359,16 @@ The *Pool Data* follows a simple structure. Files are stored grouped by language
 >
 >*Pool Data* can be very large. When the *Pool Data* is tokenized, the tokenized data will be at a little bigger than the non-tokenized data due to the spaces added. Ensure that there is enough storage capacity available for this large set of data.
 
+----
 ## Dependancies
----------------
 ### KenLM
 https://kheafield.com/code/kenlm/
 
 ### Tokenizer
 The default tokenizer is from the Moses toolkit. Any tokenizer can be used, so long as it is the same tokenizer used for processing both the *Pool Data* and the *Domain Sample Data*.
 
+----
 ## FAQ
-------
 #### What encoding is supported for data files?
 All data files should be encoded in UTF-8.
 
