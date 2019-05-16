@@ -1,11 +1,45 @@
 # Domain Adaptation
+## Table of Contents
+- [Introduction](#introduction)
+  - [What is Domain Adaptation](#x)
+  - [Approach](#approach)
+- [Installation](#installation)
+- Processes and Tools
+  - Full Process
+  - Output Files
+  - Individual Tools
+    - TokenizeDomainSampleData.py
+    - TokenizePoolData.py
+    - TrainDomainModel.py
+    - ScorePoolData.py
+    - ExtractMatchedDomainData.py
+  - Configuration File – config.json
+  - Pool Data Folder Structure
+- Dependancies
+  - KenLM
+  - Tokenizer
+- FAQ
+  
+WORK IN PROGRESS
+
 ## Introduction
 ---------------
-Domain Adaptation in the context of machine translation is achieved by training machine translation engines using a set of domain specific data. The challenge in doing so is to identify domain specific bilingual data that is suitable for training an MT engine.
 
-Bilingual datasets and corpus collections, such as ParaCrawl, have very large volumes of data that have many different domains mixed in together. Often the data has been collected from unknown sources with no associated metadata that could identify the content as belonging to any particular domain. For example, websites crawled could include information technology, life sciences, travel, shopping, automotive and much more. In the case of ParaCrawl, this can be as large as hundreds of millions of sentences or even several billion of sentences.
+### What is Domain Adaptation?
+Domain Adaptation in lay terms is the biasing of the training data used to train machine translation (MT) to match the domain of the content being translated higher quality domain-specific translations are produced.
 
-This set of tools is designed to extract domain specific data using an in-domain monolingual data source from a pool of existing bilingual data (i.e. ParaCrawl). A model is trained on in-domain monolingual data that is used to score the larger pool of bilingual data. Once scores have been produced, different extracts can be created using a user specified score threshold.
+Although high-quality domain-specific translation is important in the real-world use, the domain-specific corpora required to train MT to produce such translations is difficult to acquire and identify. In many cases, domain-specific corpora are non-existent or very scarce. This has resulted in most MT systems being trained on generic, unknown domain and out-of-domain that performs poorly. It has been clearly demonstrated that much more impressive results can be achieved when there MT systems are trained using high-quality in-domain parallel corpora than with larger volumes of unknown domain parallel corpora. 
+
+Domain adaptation for Statistical Machine Translation (SMT) and Neural Machine Translation (NMT) is a relatively new but very important research topic that aims to enable higher quality translations that are more closely matched and optimized for a specific context or domain. Irrespective of the technology used to translate, all approaches leverage in-domain data that is matched to a desired domain to deliver higher quality translations. 
+
+These tools in this sub-project of ParaCrawl are designed to extract domain-specific parallel corpora from a large body of unknown domain corpora using a monolingual corpus as a filtering and scoring mechanism. These tools do not analyze the quality of the translations in the parallel corpora, that is a different task, which is addressed by a number of sister technologies within the ParaCrawl project. This approach operates only on one side of a parallel corpora to determine whether it is in a similar domain to a provided monolingual corpus.
+
+### Approach
+Domain Adaptation in the context of machine translation is achieved by training machine translation engines using a set of domain specific parallel corpora. The challenge in doing so is to identify domain specific parallel corpora that is suitable for training an MT engine.
+
+Parallel corpora, such as ParaCrawl, have very large volumes of data that have many different domains mixed in together. Often the data has been collected from unknown sources without any associated metadata that could identify the content as belonging to any particular domain. For example, websites crawled could include information technology, life sciences, travel, shopping, automotive and much more. In the case of ParaCrawl, this can be as large as hundreds of millions of sentences or even several billion of sentences.
+
+This set of tools is designed to extract domain-specific parallel corpora from a pool of existing parallel corpora (i.e. ParaCrawl) using in-domain monolingual corpora. A model is trained on in-domain monolingual corproa that is used to score the larger pool of parallel corpora. Once scores have been produced, different extracts can be created using a user specified score threshold.
 
 ![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/ConceptialDiagram2.jpg "Contextual Diagram")
 
@@ -21,6 +55,9 @@ This set of tools is designed to extract domain specific data using an in-domain
 * Domain Matched Data: 
   * The subset of Pool Data that is determined to be similar to the Domain Sample Data.
   * This data is bilingual and suitable for training a domain specific engine.
+
+## Installation
+TODO
 
 ## Process and Tools
 ---------
@@ -269,14 +306,6 @@ The configuration file determines constant elements within the processing such a
 }
 ```
 
-## Dependancies
----------------
-### KenLM
-https://kheafield.com/code/kenlm/
-
-### Tokenizer
-The default tokenizer is from the Moses toolkit. Any tokenizer can be used, so long as it is the same tokenizer used for processing both the *Pool Data* and the *Domain Sample Data*.
-
 ## Pool Data Folder Structure
 The pool data follows a simple structure. Files are stored grouped by language pair and then split into each individual language. Thsi is the same format that ParaCrawl is published in.
 
@@ -290,6 +319,14 @@ The pool data follows a simple structure. Files are stored grouped by language p
 /data/pool/en_de/en/myfile.txt
 /data/pool/en_de/de/myfile.txt
 ```
+
+## Dependancies
+---------------
+### KenLM
+https://kheafield.com/code/kenlm/
+
+### Tokenizer
+The default tokenizer is from the Moses toolkit. Any tokenizer can be used, so long as it is the same tokenizer used for processing both the *Pool Data* and the *Domain Sample Data*.
 
 ## FAQ
 ------
