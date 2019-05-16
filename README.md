@@ -67,6 +67,22 @@ Each tool can be run independently to update data or to rerun a step if needed w
 ### Full Process
 ![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/Process3.jpg "Process")
 
+**Process Summary**
+
+The script `FullProcess.py` chains together all the tools in sequence to produce the model and then score the parallel corpora *Pool Data* against the model.
+1. FullProcess.py - Initiates the processing.
+  - Processing tasks for *Domain Sample Data* and *Pool Data* run in parallel.
+2. *Domain Sample Data* Processing
+     1. TokenizeDomainSampleData.py - Tokenizes the *Domain Sample Data* in preparation for training the model.
+     2. TrainDomainModel.py - Trains a model based on the tokenized *Domain Sample Data*.
+3. *Pool Data* Processing
+     1. TokenizePoolData.py - Tokenizes the *Pool Data*. This can be very large and take some time.
+4. ScorePoolData.py - Scores the *Pool Data* using the trained domain model.
+5. ExtractMatchedDomainData.py - Extracts *Pool Data* that is above a user specified score threshold. 
+   - The output of this step is domain-specific parallel corpora that is a subset of the *Pool Data* that can be used for training MT engines.
+     
+**Running The Full Process**
+
 To run the full process use the following command line:
 ```bash
 FullProcess.sh -dn {domain_name} -sl {source_language} -tl {target_language} -dsd {domain_sample_data_path} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
