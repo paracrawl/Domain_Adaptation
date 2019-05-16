@@ -1,27 +1,28 @@
 # Domain Adaptation
 ## Table of Contents
 - [Introduction](#introduction)
-  - [What is Domain Adaptation](#x)
+  - [What is Domain Adaptation](#what-is-domain-adaptation)
   - [Approach](#approach)
 - [Installation](#installation)
-- Processes and Tools
-  - Full Process
-  - Output Files
-  - Individual Tools
-    - TokenizeDomainSampleData.py
-    - TokenizePoolData.py
-    - TrainDomainModel.py
-    - ScorePoolData.py
-    - ExtractMatchedDomainData.py
-  - Configuration File – config.json
-  - Pool Data Folder Structure
-- Dependancies
-  - KenLM
-  - Tokenizer
-- FAQ
+- [Processes and Tools](#processes-and-tools)
+  - [Full Process](#full-process)
+  - [Output Files](#output-files)
+    - [Extracted Domain Matched Data](#extracted-domain-matched-data)
+    - [Model](#model)
+    - [Scores](#scores)
+  - [Individual Tools](#individual-tools)
+    - [TokenizeDomainSampleData.py](#tokenizedomainsampledatapy)
+    - [TokenizePoolData.py](#tokenizepooldatapy)
+    - [TrainDomainModel.py](#traindomainmodelpy)
+    - [ScorePoolData.py](#scorepooldatapy)
+    - [ExtractMatchedDomainData.py](#extractmatcheddomaindatapy)
+  - [Configuration File – config.json](#configuration-file--configjson)
+  - [Pool Data Folder Structure](#pool-data-folder-structure)
+- [Dependancies](#dependancies)
+  - [KenLM](#kenlm)
+  - [Tokenizer](#tokenizer)
+- [FAQ](#FAQ)
   
-WORK IN PROGRESS
-
 ## Introduction
 ---------------
 
@@ -57,12 +58,13 @@ This set of tools is designed to extract domain-specific parallel corpora from a
   * This data is bilingual and suitable for training a domain specific engine.
 
 ## Installation
-TODO
-
-## Process and Tools
+>TODO
+>- Installion and final code uploaded shortly.
+## Processes and Tools
 ---------
 Each tool can be run independently to update data or to rerun a step if needed without rerunning the entire process. 
 
+### Full Process
 ![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/Process3.jpg "Process")
 
 To run the full process use the following command line:
@@ -147,7 +149,7 @@ The trained model used for matching is stored in the `model` subfolder.
 ```
 This model will be updated each time the training is run for this language pair and domain.
 
-### Scores
+#### Scores
 The *Pool Data* is processed and stored in the `scores` subfolder. 
 
 ```bash
