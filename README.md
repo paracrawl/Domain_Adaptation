@@ -58,8 +58,7 @@ This set of tools is designed to extract domain-specific parallel corpora from a
 
 ----
 ## Installation
->TODO
->- Installion and final code uploaded shortly.
+Installation instructions are provided in [INSTALL.md](https://github.com/paracrawl/Domain_Adaptation/blob/master/INSTALL.md)
 
 ----
 ## Processes and Tools
