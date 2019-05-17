@@ -28,18 +28,18 @@
 ### What is Domain Adaptation?
 Domain Adaptation in lay terms is the biasing of the training data used to train machine translation (MT) to match the domain of the content being translated to yield higher quality domain-specific translation.
 
-Although high-quality domain-specific translation is important in the real-world use, the domain-specific corpora required to train MT to produce such translations is difficult to acquire and identify. In many cases, domain-specific corpora are non-existent or very scarce. This has resulted in most MT systems being trained on generic, unknown domain and out-of-domain that performs poorly. It has been clearly demonstrated that much more impressive results can be achieved when there MT systems are trained using high-quality in-domain parallel corpora than with larger volumes of unknown domain parallel corpora. 
+Although high-quality domain-specific translation is important in the real-world use, the domain-specific corpora required to train MT to produce such translations are difficult to acquire and identify. In many cases, domain-specific corpora are non-existent or very scarce. This has resulted in most MT systems being trained on generic, unknown domains and out-of-domain that performs poorly. It has been clearly demonstrated that much more impressive results can be achieved when there MT systems are trained using high-quality in-domain parallel corpora than with larger volumes of unknown domain parallel corpora. 
 
-Domain adaptation for Statistical Machine Translation (SMT) and Neural Machine Translation (NMT) is a relatively new but very important research topic that aims to enable higher quality translations that are more closely matched and optimized for a specific context or domain. Irrespective of the technology used to translate, all approaches leverage in-domain data that is matched to a desired domain to deliver higher quality translations. 
+Domain adaptation for Statistical Machine Translation (SMT) and Neural Machine Translation (NMT) is a very important research topic that aims to enable higher quality translations that are more closely matched and optimized for a specific context or domain. Irrespective of the technology used to translate, all approaches leverage in-domain data that is matched to a desired domain to deliver higher quality translations. 
 
-These tools in this sub-project of ParaCrawl are designed to extract domain-specific parallel corpora from a large body of unknown domain corpora using a monolingual corpus as a filtering and scoring mechanism. These tools do not analyze the quality of the translations in the parallel corpora, that is a different task, which is addressed by a number of sister technologies within the ParaCrawl project. This approach operates only on one side of a parallel corpora to determine whether it is in a similar domain to a provided monolingual corpus.
+These tools in this sub-project of ParaCrawl are designed to extract domain-specific parallel corpora from a large body of unknown domain corpora using a monolingual corpus as a filtering and scoring mechanism. These tools do not analyze the quality of the translations in the parallel corpora, that is a different task, which is addressed by a number of sister technologies within the ParaCrawl project. This approach operates only on one side of a parallel corpus to determine whether it is in a similar domain to a provided monolingual corpus.
 
 ### Approach
-Domain Adaptation in the context of machine translation is achieved by training machine translation engines using a set of domain specific parallel corpora. The challenge in doing so is to identify domain specific parallel corpora that is suitable for training an MT engine.
+Domain Adaptation in the context of machine translation is achieved by training machine translation engines using a set of domain specific parallel corpora. The challenge in doing so is to identify domain specific parallel corpora that are suitable for training an MT engine.
 
-Parallel corpora, such as ParaCrawl, have very large volumes of data that have many different domains mixed in together. Often the data has been collected from unknown sources without any associated metadata that could identify the content as belonging to any particular domain. For example, websites crawled could include information technology, life sciences, travel, shopping, automotive and much more. In the case of ParaCrawl, this can be as large as hundreds of millions of sentences or even several billion of sentences.
+Parallel corpora, such as ParaCrawl, have very large volumes of data in many different domains mixed together. Often the data has been collected from unknown sources without any associated metadata that could identify the content as belonging to any particular domain. For example, websites crawled could include content about information technology, life sciences, travel, shopping, automotive and much more. 
 
-This set of tools is designed to extract domain-specific parallel corpora from a pool of existing parallel corpora (i.e. ParaCrawl) using in-domain monolingual corpora. A model is trained on in-domain monolingual corproa that is used to score the larger pool of parallel corpora. Once scores have been produced, different extracts can be created using a user specified score threshold.
+This set of tools is designed to extract domain-specific parallel corpora from a pool of existing parallel corpora (i.e., ParaCrawl) using in-domain monolingual corpora. A model is trained on in-domain monolingual corpora that are used to score the larger pool of parallel corpora. Once scores have been produced, different extracts can be created using a user specified score threshold.
 
 ![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/ConceptialDiagram2.jpg "Contextual Diagram")
 
@@ -62,7 +62,7 @@ Installation instructions are provided in [INSTALL.md](https://github.com/paracr
 
 ----
 ## Processes and Tools
-Each tool can be run independently to update data or to rerun a step if needed without rerunning the entire process. 
+Each tool can be run independently to update data or to re-run a step if needed without re-running the entire process. 
 
 All tools and default configuration files reside in the installation folder. 
 
