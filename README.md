@@ -26,7 +26,7 @@
 ----
 ## Introduction
 ### What is Domain Adaptation?
-Domain Adaptation in lay terms is the biasing of the training data used to train machine translation (MT) to match the domain of the content being translated higher quality domain-specific translations are produced.
+Domain Adaptation in lay terms is the biasing of the training data used to train machine translation (MT) to match the domain of the content being translated to yield higher quality domain-specific translation.
 
 Although high-quality domain-specific translation is important in the real-world use, the domain-specific corpora required to train MT to produce such translations is difficult to acquire and identify. In many cases, domain-specific corpora are non-existent or very scarce. This has resulted in most MT systems being trained on generic, unknown domain and out-of-domain that performs poorly. It has been clearly demonstrated that much more impressive results can be achieved when there MT systems are trained using high-quality in-domain parallel corpora than with larger volumes of unknown domain parallel corpora. 
 
