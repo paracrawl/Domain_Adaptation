@@ -18,7 +18,7 @@
     - [ExtractMatchedDomainData.py](#extractmatcheddomaindatapy)
   - [Configuration File – config.json](#configuration-file--configjson)
   - [Pool Data Folder Structure](#pool-data-folder-structure)
-- [Dependancies](#dependancies)
+- [Dependencies](#dependencies)
   - [KenLM](#kenlm)
   - [Tokenizer](#tokenizer)
 - [FAQ](#FAQ)
@@ -359,7 +359,7 @@ The *Pool Data* follows a simple structure. Files are stored grouped by language
 >*Pool Data* can be very large. When the *Pool Data* is tokenized, the tokenized data will be at a little bigger than the non-tokenized data due to the spaces added. Ensure that there is enough storage capacity available for this large set of data.
 
 ----
-## Dependancies
+## Dependencies
 ### KenLM
 https://kheafield.com/code/kenlm/
 
