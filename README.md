@@ -55,6 +55,9 @@ This set of tools is designed to extract domain-specific parallel corpora from a
 * Domain Matched Data: 
   * The subset of Pool Data that is determined to be similar to the Domain Sample Data.
   * This data is bilingual and suitable for training a domain specific engine.
+* Language Codes:
+  * These are based on ISO 639-1 (http://www.loc.gov/standards/iso639-2/php/code_list.php), which represents most major languages in the world and is used frequently by many tools such as Moses to indicate the language for tokenization and other processing. 
+  * The Pool Data should be stored based on Language Code. If you need to use alternate language codes, then the Pool Data file structure and Tokenizer must have matching language codes.
 
 ----
 ## Installation
@@ -87,12 +90,12 @@ The script `FullProcess.py` chains together all the tools in sequence to produce
 
 To run the full process use the following command line:
 ```bash
-FullProcess.sh -dn {domain_name} -sl {source_language} -tl {target_language} -dsd {domain_sample_data_path} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
+FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -dsd {domain_sample_data_path} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
 ```
 
 *Arguments*
 - `-dn` The name of the domain that you are extracting data for. This is used only for the purpose of labeling and identifying the data that is matched.
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
+- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de. 
 - `-tl` The target language that will be paired with the source language when sentence pair data is extracted. This should be lower case.
   - This is used to detemine the path to the *Pool Data*.
 - `-dsd` The Domain Sample Data Path is the path to the folder comtaining the *Domain Sample Data* that will be used as a reference set of data for analysis and model training. 
@@ -110,7 +113,7 @@ If the *Pool Data* is already tokenized, then the data does not need to be token
 The example below will process *Domain Sample Data* file found in  `/data/mysample/` and write the *Domain Matched Data* to `/data/domain/automotive/en_de/`. Matching data will only be extracted if it scores above the threshold of 0.5.
 
 ```sh
-FullProcess.sh -dn automotive -s en -t de -dsd /data/mysample/ -dmd /data/domain/ -est 0.5
+FullProcess.py -dn automotive -s en -t de -dsd /data/mysample/ -dmd /data/domain/ -est 0.5
 ```
 
 ### Output Files
