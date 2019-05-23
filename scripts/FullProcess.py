@@ -88,6 +88,6 @@ if __name__ == '__main__':
 		if cmd_5 != 0:
 			sys.stdout.write("There was a problem with ExtractMatchedDomainData.py")
 			sys.exit(1)
-	except:
-		raise Exception("There was a problem with Full Running ")
+	except Exception as e:
+		print(e, file=sys.stderr)
 		sys.exit(1)
