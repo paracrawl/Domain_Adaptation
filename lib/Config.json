@@ -1,7 +1,0 @@
-{
-	"TokenizerCMD" : "/opt/mosesdecoder/scripts/tokenizer/tokenizer.perl -l %lang -threads 4 < %input_file_path > %output_file_path ",
-	"KenLM" : "/opt/send2/Data_Sentences/kenlm/",
-	"nGram" : "5",
-	"PoolDataRootPath" : "/opt/send2/Data_Sentences/Paracrawl_Domain_Detection/test_improve/New_version/pool_data/",
-	"LogPath" : "/opt/send2/Data_Sentences/Paracrawl_Domain_Detection/test_improve/New_version/log/"
-}
