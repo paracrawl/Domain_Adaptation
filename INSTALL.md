@@ -1,5 +1,18 @@
 # Domain Adaptation Tools Installation
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Configuration File – config.json](#configuration-file--configjson)
+  - [Pool Data Folder Structure](#pool-data-folder-structure)
+- [Dependencies](#dependencies)
+  - [KenLM](#kenlm)
+  - [Tokenizer](#tokenizer)
+
+----
+## Introduction
+### Installation Steps
+### Configuration File
+### Pool Data Folder Structure
 
 
 InDomain detection is a tool designed to extract in-domain data from a large collections of data.
