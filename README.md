@@ -3,24 +3,22 @@
 - [Introduction](#introduction)
   - [What is Domain Adaptation](#what-is-domain-adaptation)
   - [Approach](#approach)
+  - [How Scoring Works](#how-scoring-works)
+  - [Very Large Data Recommendations](#very-large-data-recommendations)
 - [Installation](#installation)
 - [Processes and Tools](#processes-and-tools)
   - [Full Process](#full-process)
   - [Output Files](#output-files)
     - [Extracted Domain Matched Data](#extracted-domain-matched-data)
-    - [Model](#model)
+    - [Domain Model](#domainmodel)
     - [Scores](#scores)
   - [Individual Tools](#individual-tools)
     - [TokenizeDomainSampleData.py](#tokenizedomainsampledatapy)
     - [TokenizePoolData.py](#tokenizepooldatapy)
     - [TrainDomainModel.py](#traindomainmodelpy)
+    - [TrainPoolDataModel.py](#trainpooldatamodelpy)
     - [ScorePoolData.py](#scorepooldatapy)
     - [ExtractMatchedDomainData.py](#extractmatcheddomaindatapy)
-  - [Configuration File – config.json](#configuration-file--configjson)
-  - [Pool Data Folder Structure](#pool-data-folder-structure)
-- [Dependencies](#dependencies)
-  - [KenLM](#kenlm)
-  - [Tokenizer](#tokenizer)
 - [FAQ](#FAQ)
 
 
@@ -42,7 +40,7 @@ Parallel corpora, such as ParaCrawl, have very large volumes of data in many dif
 
 This set of tools is designed to extract domain-specific parallel corpora from a pool of existing parallel corpora (i.e., ParaCrawl) using in-domain monolingual corpora. A model is trained on in-domain monolingual corpora that are used to score the larger pool of parallel corpora. Once scores have been produced, different extracts can be created using a user specified score threshold.
 
-![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/ConceptialDiagram2.jpg "Contextual Diagram")
+![alt text](ConceptialDiagram2.jpg "Contextual Diagram")
 
 **Definitions:**
 * Domain Sample Data:
@@ -57,12 +55,31 @@ This set of tools is designed to extract domain-specific parallel corpora from a
   * The subset of Pool Data that is determined to be similar to the Domain Sample Data.
   * This data is bilingual and suitable for training a domain specific engine.
 * Language Codes:
-  * These are based on ISO 639-1 (http://www.loc.gov/standards/iso639-2/php/code_list.php), which represents most major languages in the world and is used frequently by many tools such as Moses to indicate the language for tokenization and other processing. 
+  * These are based on [ISO 639-1](http://www.loc.gov/standards/iso639-2/php/code_list.php), which represents most major languages in the world and is used frequently by many tools such as Moses to indicate the language for tokenization and other processing. 
   * The Pool Data should be stored based on Language Code. If you need to use alternate language codes, then the Pool Data file structure and Tokenizer must have matching language codes.
 
+## How Scoring works
+Data is scored using one of too modes that is configured in the [config.json](INSTALL.md#configjson) file:
+
+* 1 - Single Model 
+  * This process is designed to work with a single langauge model and using only scoring with the source language. 
+  * When processing content such as ParaCrawl the size of both the data and the storage can be quite substantial. Recognizing that not all users have very large storage, memory and CPU capacity available to them, this approach provides for a fast and compact scoring mechanism that may be useful resources are limited. 
+* 2 - Moore-Lewis
+  * This process applies [Moore and Lewis's approach](http://research.microsoft.com/apps/pubs/default.aspx?id=138756) and offers a higher precision of translation models for machine translation.  
+
+Both approaches score the *Pool Data* against the *Domain* data and write a score file that is matched by line number to the corresponding line number in the *Pool Data* source and target files. Different extracts of the data based on a user specified score threshold can be taken using `ExtractMatchedDomainData.py`.
+
+## Very Large Data Recommendations
+While the code is designed to stream data whereever possible, there are practical limitations on both storage and memory for many users. This section provides a simple guide on how to best utilize resources for very large data.
+
+- The size of both the *Domain Data* and the *Pool Data* is more than double once tokenized. *Pool Data* language models can become very large and in some cases may not be practical to load due to their size. See [Storage Considerations](INSTALL.md#storage-considerations) for more details.    
+- KenLM supports both Probing and Trie data structures. It is generally recommended to use probing if you have the memory and Trie if you do not.
+- Consider using language model pointer compression with a Trie data structure to create smaller language models. This has a time cost tradeoff. Processing is slower, but very large models require less memory. Different data structures are provided for differing levels of performance and speed by KenLM. These are documented [here](https://kheafield.com/code/kenlm/structures/) and can be configured in the KenLMBinarization variable in the [config.json](INSTALL.md#configjson) file.
+- Consider using *Single Model* mode (1) for faster scoring with less precision, due to the utilization of single language model. This is suitable at runtime for machines with less memory. If you are having trouble binarizing very large language models, this mode may provide a viable an alternative. 
+ 
 ----
 ## Installation
-Installation instructions are provided in [INSTALL.md](https://github.com/paracrawl/Domain_Adaptation/blob/master/INSTALL.md)
+Installation instructions are provided in [INSTALL.md](INSTALL.md)
 
 ----
 ## Processes and Tools
@@ -71,20 +88,23 @@ Each tool can be run independently to update data or to re-run a step if needed 
 All tools and default configuration files reside in the installation folder. 
 
 ### Full Process
-![alt text](https://github.com/paracrawl/Domain_Adaptation/blob/master/Process3.jpg "Process")
+![alt text](Process4.png "Process")
 
 **Process Summary**
 
 The script `FullProcess.py` chains together all the tools in sequence to produce the model and then score the parallel corpora *Pool Data* against the model.
-1. FullProcess.py - Initiates the processing.
-  - Processing tasks for *Domain Sample Data* and *Pool Data* run in parallel.
+1. FullProcess.py - Initiates the processing of the full process.
+     - Processing tasks for *Domain Sample Data* and *Pool Data* run in parallel.
 2. *Domain Sample Data* Processing
      1. TokenizeDomainSampleData.py - Tokenizes the *Domain Sample Data* in preparation for training the model.
-     2. TrainDomainModel.py - Trains a model based on the tokenized *Domain Sample Data*.
+     2. TrainDomainModel.py - Trains a domain model based on the tokenized *Domain Sample Data*.
 3. *Pool Data* Processing
      1. TokenizePoolData.py - Tokenizes the *Pool Data*. This can be very large and take some time.
-4. ScorePoolData.py - Scores the *Pool Data* using the trained domain model.
-5. ExtractMatchedDomainData.py - Extracts *Pool Data* that is above a user specified score threshold. 
+     2. TrainPoolDataModel.py - Trains the Pool Data Model based on the tokenized *Pool Data*. This can be very large and take some time.
+4. Scoring
+    1. ScorePoolData.py - Scores the *Pool Data* using the trained domain model for Singple Model mode (1) or a domain model and a pool data model using the Moore-Lewis (2) approach.
+5. ExtractMatchedDomainData.py 
+   - Extracts *Pool Data* that is above a user specified score threshold. 
    - The output of this step is domain-specific parallel corpora that is a subset of the *Pool Data* that can be used for training MT engines.
      
 **Running The Full Process**
@@ -158,8 +178,8 @@ In the below example the full path is specified, with the score and the source a
 /data/automotive/en_de/0.15/de
 ```
 
-#### Model
-The trained model used for matching is stored in the `model` subfolder.
+#### Domain Model
+The trained doman model used for matching is stored in the `model` subfolder.
 
 ```bash
 {domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/
@@ -170,6 +190,20 @@ The trained model used for matching is stored in the `model` subfolder.
 /data/automotive/en_de/model/
 ```
 This model will be updated each time the training is run for this language pair and domain.
+
+#### Pool Data Model
+The trained Pool Data model used for matching is stored in the `model` subfolder.
+
+```bash
+{pool_data_path}/{source_language}_{target_language}/{source_language}/model/
+```
+
+**Example:**
+
+```bash
+/pooldata/en_de/en/model/
+```
+This model will be updated each time the training is run for this language pair.
 
 #### Scores
 The *Pool Data* is processed and stored in the `scores` subfolder. 
@@ -259,6 +293,27 @@ The below example trains a model and tokenizes any files found in `/data/mysampl
 TrainDomainModel.py -dn autotmotive -dnd /data/mysample/ -sl en -tl de -dmd /data/output/
 ```
 
+### TrainPoolDataModel.py
+Trains the *Pool Data* for a specified language pair when using *Moore-Lewis Scoring* approach. This is not needed when using the *Single Model Scoring* Approach.
+
+```sh
+TrainPoolDataModel.py -sl {source_language} -tl {target_language} -c {config_path}
+```
+
+*Arguments*
+- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
+- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
+
+The trained model will be written to `{pool_data_path}/{source_language}_{target_language}/{source_language}/model/`. If the model is retrained, then it will be overwritten.
+
+**Example:**
+
+The below example will train a language model in the en-de language pair utilizing the pre-tokenized *Pool Data* found at `{pool_data_path}/en_de/en/tok/*`. The language model will be output to `{pool_data_path}/en_de/en/model/`.
+
+```sh
+TokenizePoolData.py -sl en -tl de
+```
+
 ### ScorePoolData.py
 Scores the *Pool Data* for the specified langauge pair against a specified domain model.
 
@@ -318,57 +373,8 @@ In the below example, the scores will be loaded from `/data/automotive/en_de/sco
 ExtractMatchedDomainData.py -dn automotive -sl en -tl de -dmd /data/ -est 0.5
 ```
 
-## Configuration File – config.json
-------------
-The configuration file determines constant elements within the processing such as paths and dependency tools for tokenizing and model training.
-```json
-{
-	"TokenizerCMD" : "/opt/mosesdecoder/scripts/tokenizer/tokenizer.perl -l %lang  -threads 4 < %input_file_path >  %output_file_path ",
-	"KenLM" : "/opt/send2/Data_Sentences/kenlm/",
-	"nGram" : "5",
-	"PoolDataRootPath" : "/domainadaptation/data/pool/",
-	"LogPath" : "/domainadaptation/logs/"
-}
-```
-
-*Parameters*
-- `-TokenizerCMD` The full path to the tokenizer to be used. The variable names that can be passed through the tools to the tokenizer are as follows:
-  - `%lang` - The tokenization language.
-  - `%input_file_path` - The path to the input file that is to be tokenized.
-  - `%output_file_path` - The path to the tokenized output file.
-- `KenKM` - The path to the KenLM Installation.
-- `PoolDataRootPath` - The path to where the *Pool Data* is stored. 
-- `LogPath` - The path to write log files when processes are run.
-
->**Note:**
->
->The default configuration file will be loaded automatically by the tools. This file resides in the same folder as the scripts are running. The default configuration file can be overridden by specifing the `-c` argument on any of the tools and providing a path to an alternate configuration file.
-
-## Pool Data Folder Structure
-The *Pool Data* follows a simple structure. Files are stored grouped by language pair and then split into each individual language. This is the same format that ParaCrawl is published in. Each file has 1 sentence per line.
-
-* `{pool_data_path}/{source_language}_{target_language}/` - The root folder for the language pair for the overall pool
-* `{pool_data_path}/{source_language}_{target_language}/{source_language}` - The pool files in the source language.
-* `{pool_data_path}/{source_language}_{target_language}/{target_language}` - The pool files in the target language. The file names should be identical to the source language file name.
-
-**Example:**
-
-```sh
-/data/pool/en_de/en/myfile.txt
-/data/pool/en_de/de/myfile.txt
-```
-
->**Note:**
->
->*Pool Data* can be very large. When the *Pool Data* is tokenized, the tokenized data will be at a little bigger than the non-tokenized data due to the spaces added. Ensure that there is enough storage capacity available for this large set of data.
-
-----
-## Dependencies
-### KenLM
-https://kheafield.com/code/kenlm/
-
-### Tokenizer
-The default tokenizer is from the Moses toolkit. Any tokenizer can be used, so long as it is the same tokenizer used for processing both the *Pool Data* and the *Domain Sample Data*.
+### TODO
+- Add scoring on both source and target sides. This version is limited to scoring on the source side only. A future version will permit scoring computations using bilingual corpora as well as monolingual corpora as part of the calculation. When scoring bilingually, the ranking of a pool data sentence pair is its sum of scores for both languages.
 
 ----
 ## FAQ
@@ -391,7 +397,7 @@ Yes, there are no limits on the number of current instances beyond the capacity 
 No. The files are tokenized the first time and then saved. When running the tokenize steps, a check is performed and only files that are not already tokenized are processed.
 
 #### Can I add more files to the Pool Data over time?
-Yes. You can copy the source and target langauge files into the source and target language folder under the specified language pair in the Pool Data folder. Next time tokenize is run, these files will be tokenized automatically and then available for scoring. You should run scoring again to include the files in the scores that will be extracted.
+Yes. You can copy the source and target langauge files into the source and target language folder under the specified language pair in the Pool Data folder. Next time tokenize is run, these files will be tokenized automatically and then available for scoring. You should run scoring again to include the files in the scores that will be extracted. 
 
 #### Can I add more files to the Domain Sample Data over time?
 Yes. Copy the files to the Domain Sample Data folder and then run the tokenize process and train the language model. If you run the Full Process, it will tokenize, train the model and score the data with the new model.
