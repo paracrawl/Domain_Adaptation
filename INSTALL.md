@@ -17,7 +17,6 @@
 This document provides step by step installation instructions and guides you through the configuration options, storage considerations and optimization settings that can be adjusted to meet the requrements of different systems and users.
 
 ### Installation Steps
-1. xxx
 
 ### KenLM
 https://kheafield.com/code/kenlm/
@@ -28,10 +27,6 @@ If you already have the Moses toolkit installed, then this is a good option. You
 * Moses Toolkit Tokenizer
 * KENS EMAIL TOKENIZER
 
-
-2. xxx
-3. xxxx
-4. xxxx
 
 # Requirements 
 TODO - PROVIDE CLEAN INSTRCTIONS 
@@ -159,4 +154,3 @@ Data
 |__ mysample/__tok
 ```
 ## Testing Installation
-TODO
