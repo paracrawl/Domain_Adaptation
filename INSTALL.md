@@ -29,14 +29,13 @@ If you already have the Moses toolkit installed, then this is a good option. You
 
 
 # Requirements 
-TODO - PROVIDE CLEAN INSTRCTIONS 
-# ***KenLM:
+ 
+# KenLM:
 	Download from here: https://kheafield.com/code/kenlm/
 
-CHANGE TO TOKENIZER RECOMMENDED BY KEN
-# ***Moses :
+# Moses :
 	Download from here : https://github.com/moses-smt/mosesdecoder.git
-# ***Python Libraries
+# Python Libraries
 	run: pip install -r requirements.txt
 
 
