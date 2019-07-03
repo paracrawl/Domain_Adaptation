@@ -2,17 +2,15 @@
 """
 Arguments
 
--dn The name of the domain that you are extracting data for. This is used only for the purpose of labeling and identifying the data that is matched. \n
--sl The source language that will be used for domain analysis. This should be lower case. For example en, fr, de. \n
--tl The target language that will be paired with the source language when sentence pair data is extracted. This should be lower case. \n
-This is used to detemine the path to the Pool Data. \n
--domain The Domain Sample Data Path is the path to the folder comtaining the Domain Sample Data that will be used as a reference set of data for analysis and model training. \n
-This folder must contain one or more files.\n
+-dn The name of the domain that you are extracting data for. This is used only for the purpose of labeling and identifying the data that is matched.
+-sl The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
+-tl The target language that will be paired with the source language when sentence pair data is extracted. This should be lower case.
+-domain The Domain Sample Data Path is the path to the folder comtaining the Domain Sample Data that will be used as a reference set of data for analysis and model training. This folder must contain one or more files.
 -pool Directory that contains the pool data (in two sub directories, one for each language)
 -out Directory into which selected data is stored. 
 -threshold This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted.
 -ratio Instead of specifying the threshold, compute it to select a specified ratio of the data
--c (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used \n
+-c (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used
 """
 
 import traceback

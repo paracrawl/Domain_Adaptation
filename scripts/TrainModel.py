@@ -1,27 +1,30 @@
 #!/usr/bin/python3
+
 """
 Arguments
 
--data_path The Domain Sample Data Path is the path to the folder comtaining the Domain Sample Data. The tokenized files found in the path {domain_data_sample_path} will be used to train the model.
+-data_path The Data Path is the path to the folder comtaining the Data. The tokenized files found in the path {data_path} will be used to train the model.
 This folder must contain one or more files.
--model_path The path to where the Domain Model and other relevant files will be written. See Output Files below for more details.
--l The language that will be used for domain analysis. This should be lower case. For example en, fr, de.
+-model_path The path to where the Model and other relevant files will be written. See Output Files below for more details.
+-l The language that will be used for analysis. This should be lower case. For example en, fr, de.
 -c (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 """
-#import_lib
+
 import os
 import subprocess
 import sys 
 import json
 import argparse
-#check Python version
 
+#check Python version
 if sys.version_info[0] < 3:
 	raise Exception("Must be using Python 3")
 	sys.exit(1)
+
 sys.stderr.write('=====================\n')
 sys.stderr.write('Process : Train Model\n')
 sys.stderr.write('=====================\n')
+
 #get list of files on a folder
 def get_file_list(dirpath):
 	files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath, f))]
@@ -45,8 +48,8 @@ if __name__ == '__main__':
 	# setting arguments
 	curr_path = (os.path.dirname(os.path.realpath(__file__)))+"/"
 	parser = argparse.ArgumentParser(description=__doc__)
-	parser.add_argument('-data_path', help='DomainSampleData.', required=True)
-	parser.add_argument('-model_path', help='Input DomainSample.')
+	parser.add_argument('-data_path', help='Data Path.', required=True)
+	parser.add_argument('-model_path', help='Model Path.')
 	parser.add_argument('-c', default=curr_path+'Config.json', help='Config File for tokenizer.')
 	try:
 		args = parser.parse_args()

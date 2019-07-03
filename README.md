@@ -275,13 +275,13 @@ You can utilize any tokenization scheme that you wish so long as the tokenizatio
 Yes. See the Individual Tools section.
 
 #### Can you run multiple instances at the same time?
-Yes, there are no limits on the number of current instances beyond the capacity of the machine that the tools are running on. These processes are memory and disk intensive, as such, this should be taken into consideration when processing multiple concurrent jobs.
+If these instances would create the same files, then they may conflict with each other. However, once you ran pool data preparation and model building for one language pair, then multiple processes that create subsets for different domains can be run in parallel.
 
 #### Datasets like ParaCrawl are very big. Do we need to tokenize them each time?
 No. The files are tokenized the first time and then saved. When running the tokenize steps, a check is performed and only files that are not already tokenized are processed.
 
 #### Can I add more files to the Pool Data over time?
-Yes. You can copy the source and target langauge files into the source and target language folder under the specified language pair in the Pool Data folder. Next time tokenize is run, these files will be tokenized automatically and then available for scoring. You should run scoring again to include the files in the scores that will be extracted. 
+Yes, but you will have to remove all model and score files in the working directory.
 
 #### Can I add more files to the Domain Sample Data over time?
-Yes. Copy the files to the Domain Sample Data folder and then run the tokenize process and train the language model. If you run the Full Process, it will tokenize, train the model and score the data with the new model.
+Yes, but you should give these different versions different domain names.

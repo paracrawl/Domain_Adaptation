@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 """
 Arguments
 
@@ -11,7 +12,7 @@ The score data will be written to {score_path}. One file will be output for each
 pool data files will be processed from {data_path}.
 The domain model used will be loaded from {model_path}/lm.binlm
 """
-#import lib
+
 import numpy as np 
 import xml.etree.ElementTree as ET
 from lxml import etree
@@ -21,6 +22,7 @@ import os
 import json
 import argparse
 import re
+
 #check Python version
 if sys.version_info[0] < 3:
 	raise Exception("Must be using Python 3")

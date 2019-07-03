@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 """
 Arguments
 
@@ -9,17 +10,18 @@ Each file in the folder will be checked. If {raw_data}/{original file name} does
 -l The language of the text. This should be lower case ISO code. For example en, fr, de.
 -c (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 """
-#import_lib
+
 import os
 import subprocess
 import sys 
 import json
 import argparse
-#check Python version
 
+#check Python version
 if sys.version_info[0] < 3:
 	raise Exception("Must be using Python 3")
 	sys.exit(1)
+
 sys.stderr.write('=======================\n')
 sys.stderr.write('Process : Tokenize Data\n')
 sys.stderr.write('=======================\n')
