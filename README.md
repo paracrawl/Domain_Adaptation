@@ -6,7 +6,8 @@
   - [How Scoring Works](#how-scoring-works)
   - [Very Large Data Recommendations](#very-large-data-recommendations)
 - [Installation](#installation)
-- [Processes and Tools](#processes-and-tools)
+ [Processes and Tools](#processes-and-tools)
+  - [Preparing Data](#full-process)
   - [Full Process](#full-process)
   - [Output Files](#output-files)
     - [Extracted Domain Matched Data](#extracted-domain-matched-data)
@@ -44,10 +45,10 @@ This set of tools is designed to extract domain-specific parallel corpora from a
 
 **Definitions:**
 * Domain Sample Data:
-  * The source language data that represents the content that is in domain. 
+  * The source and/or target language data that represents the content that is in domain. 
   * Larger amount of data will provide better results.
   * This data will be used to train a model for use in domain analysis.
-  * This data can be the source language side of existing bilingual data or could be monolingual data in the source language data that is in domain. 
+  * This data can be existing bilingual data or could be monolingual data in the source and/or language data that is in domain. 
 * Pool Data: 
   * Bilingual data that is from mixed domains. 
   * ParaCrawl an example the kind of data that would be suitable to uses as Pool Data.
@@ -59,15 +60,9 @@ This set of tools is designed to extract domain-specific parallel corpora from a
   * The Pool Data should be stored based on Language Code. If you need to use alternate language codes, then the Pool Data file structure and Tokenizer must have matching language codes.
 
 ## How Scoring works
-Data is scored using one of too modes that is configured in the [config.json](INSTALL.md#configjson) file:
+Data is scored using [Moore and Lewis's approach](http://research.microsoft.com/apps/pubs/default.aspx?id=138756) and offers a higher precision of translation models for machine translation.  
 
-* 1 - Single Model 
-  * This process is designed to work with a single langauge model and using only scoring with the source language. 
-  * When processing content such as ParaCrawl the size of both the data and the storage can be quite substantial. Recognizing that not all users have very large storage, memory and CPU capacity available to them, this approach provides for a fast and compact scoring mechanism that may be useful resources are limited. 
-* 2 - Moore-Lewis
-  * This process applies [Moore and Lewis's approach](http://research.microsoft.com/apps/pubs/default.aspx?id=138756) and offers a higher precision of translation models for machine translation.  
-
-Both approaches score the *Pool Data* against the *Domain* data and write a score file that is matched by line number to the corresponding line number in the *Pool Data* source and target files. Different extracts of the data based on a user specified score threshold can be taken using `ExtractMatchedDomainData.py`.
+The method scores the *Pool Data* against the *Domain* data and write a score file that is matched by line number to the corresponding line number in the *Pool Data* source and target files. Different extracts of the data based on a user specified score threshold can be taken using `ExtractMatchedDomainData.py`.
 
 ## Very Large Data Recommendations
 While the code is designed to stream data whereever possible, there are practical limitations on both storage and memory for many users. This section provides a simple guide on how to best utilize resources for very large data.
@@ -87,6 +82,36 @@ Each tool can be run independently to update data or to re-run a step if needed 
 
 All tools and default configuration files reside in the installation folder. 
 
+### Preparing Data
+
+You need to prepare two sets of data: domain data and pool data.
+
+**Domain Data**
+
+Create a directory, with subdirectories for each language. For instance, if you have both French and English data in your domain, store these in
+
+```
+my-directory/fr/my-file1.txt
+my-directory/fr/my-file2.txt
+my-directory/en/my-file1.txt
+my-directory/en/my-file2.txt
+my-directory/en/my-file3.txt
+```
+
+**Pool Data**
+
+Obtain a parallel corpus of pool data and store the same way.
+
+For instance, you could obtain Paracrawl data with the following commands:
+
+```
+wget http://s3.amazonaws.com/web-language-models/paracrawl/release4/en-fr.bicleaner07.txt.gz
+mkdir paracrawl/en
+mkdir paracrawl/fr
+gzcat en-fr.bicleaner07.txt.gz | cut -f 1 > paracrawl/en/paracrawl4.txt
+gzcat en-fr.bicleaner07.txt.gz | cut -f 2 > paracrawl/en/paracrawl4.txt
+```
+
 ### Full Process
 ![alt text](Process4.png "Process")
 
@@ -94,16 +119,16 @@ All tools and default configuration files reside in the installation folder.
 
 The script `FullProcess.py` chains together all the tools in sequence to produce the model and then score the parallel corpora *Pool Data* against the model.
 1. FullProcess.py - Initiates the processing of the full process.
-     - Processing tasks for *Domain Sample Data* and *Pool Data* run in parallel.
+     - Processing tasks for *Domain Sample Data* and *Pool Data*.
 2. *Domain Sample Data* Processing
-     1. TokenizeDomainSampleData.py - Tokenizes the *Domain Sample Data* in preparation for training the model.
-     2. TrainDomainModel.py - Trains a domain model based on the tokenized *Domain Sample Data*.
+     1. TokenizeData.py - Tokenizes the *Domain Sample Data* in preparation for training the model.
+     2. TrainModel.py - Trains a domain model based on the tokenized *Domain Sample Data*.
 3. *Pool Data* Processing
-     1. TokenizePoolData.py - Tokenizes the *Pool Data*. This can be very large and take some time.
-     2. TrainPoolDataModel.py - Trains the Pool Data Model based on the tokenized *Pool Data*. This can be very large and take some time.
+     1. TokenizeData.py - Tokenizes the *Pool Data*. This can be very large and take some time.
+     2. TrainModel.py - Trains the Pool Data Model based on the tokenized *Pool Data*. This can be very large and take some time.
 4. Scoring
-    1. ScorePoolData.py - Scores the *Pool Data* using the trained domain model for Singple Model mode (1) or a domain model and a pool data model using the Moore-Lewis (2) approach.
-5. ExtractMatchedDomainData.py 
+     1. ScorePoolData.py - Scores the *Pool Data* using the trained models using the Moore-Lewis approach.
+5. SelectData.py 
    - Extracts *Pool Data* that is above a user specified score threshold. 
    - The output of this step is domain-specific parallel corpora that is a subset of the *Pool Data* that can be used for training MT engines.
      
@@ -111,20 +136,20 @@ The script `FullProcess.py` chains together all the tools in sequence to produce
 
 To run the full process use the following command line:
 ```bash
-FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -dsd {domain_sample_data_path} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
+FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -domain {domain_sample_data_path} -pool {pool_data_path} -working-dir {temp_directory} -out {domain_match_data_path} [-threshold {extract_score_threshold}] [-ratio {extract_ratio}] -c {config_path}
 ```
 
 *Arguments*
 - `-dn` The name of the domain that you are extracting data for. This is used only for the purpose of labeling and identifying the data that is matched.
 - `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de. 
 - `-tl` The target language that will be paired with the source language when sentence pair data is extracted. This should be lower case.
-  - This is used to detemine the path to the *Pool Data*.
-- `-dsd` The Domain Sample Data Path is the path to the folder comtaining the *Domain Sample Data* that will be used as a reference set of data for analysis and model training. 
-  - This folder must contain one or more files. 
-  - Each file in the folder will be checked. If `{domain_sample_path}/{original file name}` does not have a matching file `{domain_sample_path}/tok/{original file name}` then the file will be tokenized and written to `{domain_sample_path}/tok/{original file name}`.
-- `-dmd` The path to where the Domain Matched Data and other relevant files will be written. See **Output Files** below for more details.
-- `-est` (Optional) This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted. Values are between 0 and 1. If this parameter is not specified, then the extract process will not be performed. The extract process can be run separately at a later time using `ExtractMatchedDomainData.py`.
-- `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
+- `-domain` The Domain Sample Data Path is the path to the folder comtaining the Domain Sample Data that will be used as a reference set of data for analysis and model training. This folder must contain one or more files.
+- `-pool` Directory that contains the pool data (in two sub directories, one for each language)
+- `-working-dir` Directory used to store intermediate files that may be re-used.
+- `-out` Directory into which selected data is stored. 
+- `-threshold` This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted.
+- `-ratio` Instead of specifying the threshold, compute it to select a specified ratio of the data
+- `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used
 
 The *Pool Data* is usually quite large, so could take a long time to process depending on the size of the data in the pool for the language pair. 
 If the *Pool Data* is already tokenized, then the data does not need to be tokenized again. The process has logic that will check files have been tokenized and only tokenize the file once. Deleting the tokenized file will cause it to be tokenized again on the next processing run.
@@ -134,14 +159,14 @@ If the *Pool Data* is already tokenized, then the data does not need to be token
 The example below will process *Domain Sample Data* file found in  `/data/mysample/` and write the *Domain Matched Data* to `/data/domain/automotive/en_de/`. Matching data will only be extracted if it scores above the threshold of 0.5.
 
 ```sh
-FullProcess.py -dn automotive -s en -t de -dsd /data/mysample/ -dmd /data/domain/ -est 0.5
+FullProcess.py -dn automotive -s en -t de -domain my-directory -pool paracrawl -working-dir working-dir -out extracted -ratio 0.1
 ```
 
 ### Output Files
-All output files (excluding tokenized data) will be output to the *Domain Match Data* path. This path is then appended with other parameters.
+All output files (excluding tokenized data) will be output to the *Out* path. This path is then appended with other parameters.
 
 ```bash
-{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/
+{out}/{source_language}_{target_language}/
 ```
 
 **Example:**
