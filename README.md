@@ -156,188 +156,80 @@ If the *Pool Data* is already tokenized, then the data does not need to be token
 
 **Example:**
 
-The example below will process *Domain Sample Data* file found in  `/data/mysample/` and write the *Domain Matched Data* to `/data/domain/automotive/en_de/`. Matching data will only be extracted if it scores above the threshold of 0.5.
+The example below will process *Domain Sample Data* file found in  `/data/mysample/` and write the *Domain Matched Data* to `/data/extracted/en_de/`. Matching data will only be extracted if it scores above the threshold of 0.5.
 
 ```sh
-FullProcess.py -dn automotive -s en -t de -domain my-directory -pool paracrawl -working-dir working-dir -out extracted -ratio 0.1
-```
-
-### Output Files
-All output files (excluding tokenized data) will be output to the *Out* path. This path is then appended with other parameters.
-
-```bash
-{out}/{source_language}_{target_language}/
-```
-
-**Example:**
-
-In the example below, the full path is specified with the automotive domain and a source language of English (en) and a target langauge of German (de). 
-
-```bash
-/data/automotive/en_de/
-```
-
-Assuming a *Extract Score Threshold* of 0.5 was used, subfolders would be as follows:
-
-```sh
-/data/automotive/en_de/0.5/en/
-/data/automotive/en_de/0.5/de/
-/data/automotive/en_de/model/
-/data/automotive/en_de/scores/
+FullProcess.py -dn automotive -s en -t de -domain /data/mysample/ -pool /data/paracrawl -working-dir /data/working-dir -out /data/extracted -ratio 0.1
 ```
 
 #### Extracted Domain Matched Data
 When extracting, the *Threshold Score* is used to as part of the path so that different extracts can be performed with different scores on the same data.
 
-```bash
-{extract_score_threshold}/{source_language}/
-{extract_score_threshold}/{target_language}/
-```
-
-**Example:**
-
-In the below example the full path is specified, with the score and the source and target language in different folders.
+#### Tokenized Data
 
 ```bash
-/data/automotive/en_de/0.15/en
-/data/automotive/en_de/0.15/de
+{working-dir}/{domain_name}-data/{source_language}_{target_language}/{source_language}/
+{working-dir}/{domain_name}-data/{source_language}_{target_language}/{target_language}/
+{working-dir}/pool-data/{source_language}_{target_language}/{source_language}/
+{working-dir}/pool-data/{source_language}_{target_language}/{target_language}/
 ```
 
-#### Domain Model
-The trained doman model used for matching is stored in the `model` subfolder.
+#### Models
+The trained models used for matching are stored in the `*-model` subfolders of the working directory.
 
 ```bash
-{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/
+{working-dir}/{domain_name}-model/{source_language}_{target_language}/{source_language}/
+{working-dir}/{domain_name}-model/{source_language}_{target_language}/{target_language}/
+{working-dir}/pool-model/{source_language}_{target_language}/{source_language}/
+{working-dir}/pool-model/{source_language}_{target_language}/{target_language}/
 ```
-**Example:**
-
-```bash
-/data/automotive/en_de/model/
-```
-This model will be updated each time the training is run for this language pair and domain.
-
-#### Pool Data Model
-The trained Pool Data model used for matching is stored in the `model` subfolder.
-
-```bash
-{pool_data_path}/{source_language}_{target_language}/{source_language}/model/
-```
-
-**Example:**
-
-```bash
-/pooldata/en_de/en/model/
-```
-This model will be updated each time the training is run for this language pair.
 
 #### Scores
-The *Pool Data* is processed and stored in the `scores` subfolder. 
+The pool data is scored with both the domain model and the pool model.
 
 ```bash
-{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/
+{working-dir}/{domain_name}-scores/{source_language}_{target_language}/{source_language}/
+{working-dir}/{domain_name}-scores/{source_language}_{target_language}/{target_language}/
+{working-dir}/pool-scores/{source_language}_{target_language}/{source_language}/
+{working-dir}/pool-scores/{source_language}_{target_language}/{target_language}/
 ```
-**Example:**
 
-```bash
-/data/automotive/en_de/scores/
-```
-The tool `ExtractDomainData.py` can be run multiple times with different score thresholds to generate different datasets without the need to reprocess the scores.
+#### Repeated Runs
+When running FullProcess.py multiple times, many of these intermediate files will be re-used.
+
 
 ----
 ## Individual Tools
-### TokenizeDomainSampleData.py
-Tokenizes the *Domain Sample Data* using the tokenizer specified in the configuration file.
+### TokenizeData.py
+Tokenizes the *Raw Data* using the tokenizer specified in the configuration file.
 
 ```sh
-TokenizeDomainSampleData.py -dsd {domain_sample_data_path} -sl {source_language} -c {config_path}
+TokenizeData.py -raw_data {data_path} -out {out_path} -l {language} -c {config_path}
 ```
 
 *Arguments*
-- `-dsd` The Domain Sample Data Path is the path to the folder comtaining the *Domain Sample Data* that will be used as a reference set of data for analysis and model training. 
-  - This folder must contain one or more files. 
-  - Each file in the folder will be checked. If `{domain_sample_path}/{original file name}` does not have a matching file `{domain_sample_path}/tok/{original file name}` then the file will be tokenized and written to `{domain_sample_path}/tok/{original file name}`.
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
+- `-raw_data` The data path is the path to the folder containing the data that will be tokenized
+This folder must contain one or more files.
+Each file in the folder will be checked. If `{raw_data}/{original file name}` does not have a matching file `{out}/tok/{original file name}` then the file will be tokenized and written to `{out}/tok/{original file name}`.
+- `-out` Directory where the output will be stored.
+- `-l` The language of the text. This should be lower case ISO code. For example en, fr, de.
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 
-**Example:**
-The below example tokenizes any files not already tokenized in the path `/data/mysample/` and writes the to `/data/mysample/tok/{origninal_file_name}`. The language passed to the tokenizer is English (en).
+### TrainModel.py
+Trains the model to be used when scoring the tokenized data.
 
 ```sh
-TokenizeDomainSampleData.py -dsd /data/mysample/ -sl en
-```
-
-### TokenizePoolData.py
-Tokenizes the *Pool Data* for a specified language pair using the tokenizer specified in the configuration file. The path to the *Pool Data* is specified in the configuration file.
-
-```sh
-TokenizePoolData.py -sl {source_language} -tl {target_language} -c {config_path}
+TrainDomainModel.py -data_path {tokenized_data_path} -sl {source_language} -tl {target_language} -model_path {model_path} -c {config_path}
 ```
 
 *Arguments*
-- `-dsd` The Domain Sample Data Path is the path to the folder comtaining the *Domain Sample Data* that will be used as a reference set of data for analysis and model training. 
-  - This folder must contain one or more files. 
-  - Each file in the folder will be checked. If `{pool_data_path}/{source_language}_{target_language}/{source_language}/{original file name}` does not have a matching file `{pool_data_path}/{source_language}_{target_language}/{source_language}/tok/{original file name}` then the file will be tokenized and written to `{pool_data_path}/{source_language}_{target_language}/{source_language}/tok/{original_file_name}`.
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
-- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. This should be lower case.
+- `-data_path` The Data Path is the path to the folder comtaining the Data. The tokenized files found in the path {data_path} will be used to train the model.
+This folder must contain one or more files.
+- `-model_path` The path to where the Model and other relevant files will be written. See Output Files below for more details.
+- `-l` The language that will be used for analysis. This should be lower case. For example en, fr, de.
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 
-Data that is already tokenized in the *Pool Data* folder will not be retokenized. To tokenize again, delete the file in the folder `{pool_data_path}/{source_language}_{target_language}/{source_language}/tok/{file_name}`
-
-**Example:**
-
-The below example tokenizes any files the pool in the en-de language pair that are not already tokenized. The files will be writtern to `{pool_data_path}/en_de/en/tok/{original_file_name}`.
-
-```sh
-TokenizePoolData.py -sl en -tl de
-```
-
-### TrainDomainModel.py
-Trains the domain model to be used when scoring the *Pool Data*.
-
-```sh
-TrainDomainModel.py -dn {domain_name} -dnd {domain_data_sample_path} -sl {source_language} -tl {target_language} -dmd {domain_match_data_path} -c {config_path}
-```
-
-*Arguments*
-- `-dn` The name of the domain that you are training the model for. This is used only for the purpose of labeling and identifying the data that is matched.
-- `-dsd` The *Domain Sample Data Path* is the path to the folder comtaining the *Domain Sample Data*. The tokenized files found in the path `{domain_data_sample_path}/tok/` will be used to train the model. 
-  - This folder must contain one or more files. 
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
-- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. This should be lower case.
-- `-dmd` The path to where the *Domain Matched Data* and other relevant files will be written. See **Output Files** below for more details.
-- `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
-
-The trained model will be written to `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/`. If the model is retrained, then it will be overwritten.
-
-**Example:**
-
-The below example trains a model and tokenizes any files found in `/data/mysample/tok/` and writes the model file to 
-`/data/automotive/en_de/model/`.
-
-```sh
-TrainDomainModel.py -dn autotmotive -dnd /data/mysample/ -sl en -tl de -dmd /data/output/
-```
-
-### TrainPoolDataModel.py
-Trains the *Pool Data* for a specified language pair when using *Moore-Lewis Scoring* approach. This is not needed when using the *Single Model Scoring* Approach.
-
-```sh
-TrainPoolDataModel.py -sl {source_language} -tl {target_language} -c {config_path}
-```
-
-*Arguments*
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
-- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
-
-The trained model will be written to `{pool_data_path}/{source_language}_{target_language}/{source_language}/model/`. If the model is retrained, then it will be overwritten.
-
-**Example:**
-
-The below example will train a language model in the en-de language pair utilizing the pre-tokenized *Pool Data* found at `{pool_data_path}/en_de/en/tok/*`. The language model will be output to `{pool_data_path}/en_de/en/model/`.
-
-```sh
-TokenizePoolData.py -sl en -tl de
-```
+The trained model will be written to `{data_path}/{domain_name}-model/{source_language}_{target_language}/`. If the model is retrained, then it will be overwritten.
 
 ### ScorePoolData.py
 Scores the *Pool Data* for the specified langauge pair against a specified domain model.
@@ -347,25 +239,10 @@ ScorePoolData.py -dn {domain_name} -sl {source_language} -tl {target_language} -
 ```
 
 *Arguments*
-- `-dn` The name of the domain that you are training the model for. This is used only for the purpose of labeling and identifying the data that is matched.
-- `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
-- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. This should be lower case.
-- `-dmd` The path to where the *Domain Matched Data* and other relevant files are written. See **Output Files** below for more details.
+- `-data_path` Directory that contains pool text files
+- `-score_path` Directory in which score files are stored
+- `-model_path` Model used for storing
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
-
-* The score data will be written to `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/scores/`. One file will be output for each file with a matching name to each *Pool Data* file. All previous score files will be deleted before the new scores start processing.
-* Pool Data files will be processed from `{pool_data_path}/{source_language}_{target_language}/{source_language}/tok/`.
-* The domain model used will be loaded from `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/`. 
-
-**Example:**
-
-In the below example, the model will be loaded from `/data/automotive/en_de/model/` and the scores written to `/data/automotive/en_de/scores/`.
-
-```sh
-ScorePoolData.py -dn automotive -sl en -tl de -dmd /data/
-```
-
-Once scores have been processed, data can be extracted with different extract score thresholds using `ExtractMatchedDomainData.py`.
 
 ### ExtractMatchedDomainData.py
 ```sh
@@ -375,31 +252,13 @@ ExtractMatchedDomainData.py -dn {domain_name} -sl {source_language} -tl {target_
 *Arguments*
 - `-dn` The name of the domain that you are training the model for. This is used only for the purpose of labeling and identifying the data that is matched.
 - `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
-- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the *Pool Data*. This should be lower case.
-- `-dmd` The path to where the *Domain Matched Data* and other relevant files are written. See **Output Files** below for more details.
-- `-est` This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted. Values are between 0 and 1. 
+- `-tl` The target language that will be paired with the source language to determine the path to the language pair in the Pool Data. This should be lower case.
+- `-score_path` Directory that contains scores.
+- `-out_path` Directory into which selected data is stored. 
+- `-threshold` This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted.
+- `-ratio` Instead of specifying the threshold, compute it to select a specified ratio of the data
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 
-
-* The score data will be loaded from `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/scores/`. 
-* Bilingual *Pool Data* files processed, with the lines in the files that score greater than or equal to the Extract Score Threshold being written to the Matched Domain Data. 
-* Source Language Pool Data files - `{pool_data_path}/{source_language}_{target_language}/{source_language}`
-* Target Language Pool Data files - `{pool_data_path}/{source_language}_{target_language}/{target_language}`
-* Source Language Matched Domain Data files - `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}{extract_score_threshold}/{source_language}/`
-et_language}`
-* Target Language Matched Domain Data files - `{domain_match_data_path}/{domain_name}/{source_language}_{target_language}/{extract_score_threshold}/{source_language}/`
-* The *Extract Score Threshold* is used in the output path to permit the extraction of different datasets at different threshold levels and storing them with a reference to the score that they were matched against.
-
-**Example:**
-
-In the below example, the scores will be loaded from `/data/automotive/en_de/scores/` and the source language domain data written to `/data/automotive/en_de/0.5/en/` and the target language domain data written to `/data/automotive/en_de/0.5/de/`.
-
-```sh
-ExtractMatchedDomainData.py -dn automotive -sl en -tl de -dmd /data/ -est 0.5
-```
-
-### TODO
-- Add scoring on both source and target sides. This version is limited to scoring on the source side only. A future version will permit scoring computations using bilingual corpora as well as monolingual corpora as part of the calculation. When scoring bilingually, the ranking of a pool data sentence pair is its sum of scores for both languages.
 
 ----
 ## FAQ
