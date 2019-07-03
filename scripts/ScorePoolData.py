@@ -2,14 +2,14 @@
 """
 Arguments
 
--dn The name of the domain that you are training the model for. This is used only for the purpose of labeling and identifying the data that is matched.
--sl The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
--tl The target language that will be paired with the source language to determine the path to the language pair in the Pool Data. This should be lower case.
--dmd The path to where the Domain Matched Data and other relevant files are written. See Output Files below for more details.
+-data_path Directory that contains pool text files
+-score_path Directory in which score files are stored
+-model_path Model used for storing
 -c (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
-The score data will be written to {domain_match_data_path}/{domain_name}/{source_language}_{target_language}/scores/. One file will be output for each file with a matching name to each Pool Data file. All previous score files will be deleted before the new scores start processing.
-Pool Data files will be processed from {pool_data_path}/{source_language}_{target_language}/{source_language}/tok/.
-The domain model used will be loaded from {domain_match_data_path}/{domain_name}/{source_language}_{target_language}/model/.
+
+The score data will be written to {score_path}. One file will be output for each file with a matching name to each pool data file. All previous score files will be deleted before the new scores start processing.
+pool data files will be processed from {data_path}.
+The domain model used will be loaded from {model_path}/lm.binlm
 """
 #import lib
 import numpy as np 
@@ -26,131 +26,81 @@ if sys.version_info[0] < 3:
 	raise Exception("Must be using Python 3")
 	sys.exit(1)
 
-print('Domain Adaptation')
-print('==========================')
-print('Process : Score Pool Data')
+sys.stderr.write('====================\n')
+sys.stderr.write('Process : Score Data\n')
+sys.stderr.write('====================\n')
+
 #get list of files on a folder
 def get_file_list(dirpath):
 	files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath, f))]
 	return (files)
+
 #parse the config file
 def parse_config(json_file):
 	list_args = []
 	with open(json_file,encoding='utf-8', errors='ignore') as json_data:
 		data = json.load(json_data, strict=False)
+		for x in data:
+			list_args.append(data[x])
 	return (data)
-#get the difference between two lists
-def diff(first, second):
-	second = set(second)
-	return [item for item in first if item not in second]
+
 #count the number of words in a line
 def get_word_count(line):
 	count = len(re.findall(r'\w+', line))
 	return (count)
-#get the difference of files between two folders to check if data tokenized already or not
-def diff_data(path1,path2):
-	list_item1 = []
-	list_item2 = []
-	diff_data = []
-	list_item1 = [f for f in os.listdir(path1) if os.path.isfile(os.path.join(path1, f))]
-	list_item2 = [f for f in os.listdir(path2) if os.path.isfile(os.path.join(path2, f))]
-	diff_data = diff(list_item1, list_item2)
-	return (diff_data)
+
 #get_score of setence based on Domain LM
-def get_list_of_scores(InputFile,model):
-	list_Scores = []
-	with open(str(InputFile),mode = "r" , encoding = 'utf-8') as my_matcher :
-		for item2 in my_matcher:
-			list_Scores.append(float(model.score(str(item2))))
-			#list_Scores.append(float(model.score(str(item2)))/int(get_word_count(str(item2))))
+def compute_scores(InputFile,OutputFile,model):
+	out = open(str(OutputFile), mode = "w")
+	with open(str(InputFile), mode = "r", encoding = 'utf-8') as corpus:
+		for line in corpus:
+			length = int(get_word_count(str(line)))
+			if length == 0: 
+				out.write("0\n")
+			else:
+				raw_score = model.score(str(line))
+				score = raw_score / length
+				out.write(str(score)+"\n")
 
-	return(list_Scores)
-
-#Transformation Scores for Lm 
-def transform_func(x):
-	return (1 / (1 + np.exp((np.log(float(-x))))))
-#Get scores of all lines in a file
-def get_Soft_scores(InputFile):
-	list_Soft_Scores_w = []
-	scores = get_list_of_scores(InputFile,model)
-	for w in (scores):
-		list_Soft_Scores_w.append(transform_func(float(w))*10)
-	return(list_Soft_Scores_w)
-#Get lines from a file
-def get_list_of_sent(InputFile):
-	list_Sentences = []
-	with open(str(InputFile),mode = "r" , encoding = 'utf-8') as my_matcher :
-		for item1 in my_matcher:
-			list_Sentences.append(item1.replace('\n',''))
-	return(list_Sentences)
-#create score file in xml format
-def create_xml(all_sentences,all_scores,list_Soft_Scores_w,OutputFile):
-	sentences = ET.Element("sentences")
-	sentences = ET.SubElement(sentences,"sentences")
-	for sent_nb in range(len(all_sentences)):
-		sent_i = ET.SubElement(sentences,"sent")
-		score_s = ET.SubElement(sent_i,"s_s")
-		score_s.text =str(sent_nb + 1)+"\t"+str(all_scores[sent_nb])+"\t"+str(list_Soft_Scores_w[sent_nb])
-	tree = ET.ElementTree(sentences)
-	tree.write(str(OutputFile),encoding='utf-8', xml_declaration=True)
-	assert str(OutputFile) is not None
-	parser = etree.XMLParser(resolve_entities=False, strip_cdata=False)
-	document = etree.parse(str(OutputFile), parser)
-	document.write(str(OutputFile), pretty_print=True, encoding='utf-8')
-
-
-#Run the main Process
+#run the main Process
 if __name__== "__main__":
 	# setting arguments
 	curr_path = (os.path.dirname(os.path.realpath(__file__)))+"/"
 	parser = argparse.ArgumentParser(description=__doc__)
-	parser.add_argument('-dn', help='domain', required=True)
-	parser.add_argument('-sl', help='LangID tsource.', required=True)
-	parser.add_argument('-tl', help='LangID target.', required=True)
-	parser.add_argument('-dmd', help='Input DomainSample.', required=True)
+	parser.add_argument('-data_path', help='Directory that contains text files', required=True)
+	parser.add_argument('-score_path', help='Directory in which score files are stored', required=True)
+	parser.add_argument('-model_path', help='Input DomainSample.', required=True)
 	parser.add_argument('-c', default='Config.json',help='Config File for tokenizer.')
 	try:
 		args = parser.parse_args()
-		sys.stderr = open(str(curr_path)+'ScorePoolData.log', 'w')
 	except:
 		parser.print_help()
 		sys.exit(0)
 
+	model_path = str(args.model_path)
+	data_path = str(args.data_path)
+	score_path = str(args.score_path)
 
-	#set the principal paths 
-	pool_data_path = str(parse_config(args.c)["PoolDataRootPath"])+str(args.sl)+"_"+str(args.tl)+"/"
-	pool_data_path_source = str(pool_data_path)+str(args.sl)+"/"
-	pool_data_path_target = str(pool_data_path)+str(args.tl)+"/"
-	scoring_path = str(args.dmd)+str(args.dn)+"/"+str(args.sl)+"_"+str(args.tl)+"/scores/"
-	lm_model_path = str(args.dmd)+str(args.dn)+"/"+str(args.sl)+"_"+str(args.tl)+"/model/"
-	kenlm_model = lm_model_path+str(args.dn)+"_"+str(args.sl)+"_"+str(args.tl)+"_Lm.bin"
-	#check the working environment
-	if not os.path.exists(str(pool_data_path)):
-		raise Exception("No Pool Data to extract From")
+	if not os.path.exists(str(data_path)):
+		raise Exception("Data path does not exist "+data_path)
 		sys.exit(1)
-	if not os.path.exists(str(lm_model_path)):
-		raise Exception("No lm model")
+	if not os.path.exists(model_path):
+		raise Exception("No lm mode in "+model_path)
 		sys.exit(1)
-	sys.stdout.write("Loding the model ======>  \n")
-	model = kenlm.LanguageModel(kenlm_model)
-	#check if all data scored or not 
-	if not os.path.exists(str(scoring_path)):
-		os.makedirs(str(scoring_path))
-		#start scoring data
-		for item_to_score in get_file_list(str(pool_data_path_source)+"tok/"):
-			sys.stdout.write("Start- Prepare scores for "+str(item_to_score)+"\n")
-			full_item_to_score = str(pool_data_path_source)+"tok/"+item_to_score
-			full_item_score = str(scoring_path)+item_to_score
-			create_xml(get_list_of_sent(full_item_to_score),get_list_of_scores(full_item_to_score,model),get_Soft_scores(full_item_to_score),full_item_score)
-			sys.stdout.write("Ladder File IsReady for : "+str(item_to_score)+"\n")
-	else :
-		if len(diff_data(str(pool_data_path_source)+"tok/",str(scoring_path))) !=0:
+	if not os.path.exists(score_path):
+		os.makedirs(score_path)
 
-			for item_to_score in diff_data(str(pool_data_path_source)+"tok/",str(scoring_path)):
-				sys.stdout.write("Start- Prepare scores for "+str(item_to_score)+"\n")
-				full_item_to_score = str(pool_data_path_source)+"tok/"+item_to_score
-				full_item_score = str(scoring_path)+item_to_score
-				create_xml(get_list_of_sent(full_item_to_score),get_list_of_scores(full_item_to_score,model),get_Soft_scores(full_item_to_score),full_item_score)
-				sys.stdout.write("Ladder File IsReady for : "+str(item_to_score)+"\n")
+	file_list = get_file_list(data_path)
+	# if empty, complain
+
+	model = kenlm.LanguageModel(model_path)
+	for text_file in file_list:
+		in_file = data_path+"/"+text_file
+		out_file = score_path+"/"+text_file
+		if os.path.exists(out_file):
+			sys.stderr.write("already processed " + in_file + "\n")
 		else:
-			sys.stdout.write("End :\t No Data left to Score \n")
+			sys.stderr.write("scoring " + in_file + ", score in " + out_file + "\n")
+			compute_scores(in_file, out_file, model)
+		
+	sys.stdout.write("End :\t No Data left to Score \n")
