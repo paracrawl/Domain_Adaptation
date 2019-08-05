@@ -131,7 +131,6 @@ def process(pool_data_path, pool_score_path, domain_score_path, out_path, sl, tl
 				domain = float(domain_score_target.readline())
 				score += domain - pool
 			# have threshold -> write out file
-			pool_data_source_line = pool_data_source.readline()
 			pool_data_target_line = pool_data_target.readline()
 			if compute_threshold:
 				score_list.append(score)
