@@ -20,6 +20,7 @@
     - [TrainPoolDataModel.py](#trainpooldatamodelpy)
     - [ScorePoolData.py](#scorepooldatapy)
     - [ExtractMatchedDomainData.py](#extractmatcheddomaindatapy)
+- [Comparative BLEU Score Analysis](#comparative-bleu-score-analysis)
 - [FAQ](#FAQ)
 
 
@@ -259,6 +260,40 @@ ExtractMatchedDomainData.py -dn {domain_name} -sl {source_language} -tl {target_
 - `-ratio` Instead of specifying the threshold, compute it to select a specified ratio of the data
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used.
 
+# Comparative BLEU Score Analysis
+
+The premise of domain adaptation is that when the training data is in-domain that it will produce better (score better) translations than out-of-domain training data. In this context, out-of-domain is general content that has not been filtered for any domain and the data may/may not include in-domain data. 
+
+**Approach**
+
+As a basic test to show the difference between in-domain vs out-of-domain content, we have selected several domains from content on OPUS (http://opus.nlpk.eu).  We will extract content that is similar using the Paracrawl data.
+We will compare BLEU scores for a set of 1 million in-domain and 1 million out-of-domain sentences. This test set has been specifically limited to 1 million lines. 
+
+1. Using a specified set of data in-domain data (JRC Acquis / EMEA), generate 1 million lines of in-domain content from the pool data (Paracrawl). 
+2. Take 1 million random lines from the pool data (Paracrawl).
+3. Train NMT and SMT engines .
+4. Compare BLEU scores using a blind test set of 1,000 lines.
+
+**Test Profile**
+
+Language Pair – English-Czech (EN-CZ)
+
+**In-Domain Samples**
+
+In-Domain data was processed from the following sources:
+1. JRC Acquis – Legislative / Finance Domain - http://opus.nlpl.eu/JRC-Acquis.php
+2. EMEA - European Medicines Agency – Health Domain - http://opus.nlpl.eu/EMEA.php
+
+**BLEU Scores**
+
+| Test Set Domain | In/Out of Domain | SMT Case Sensitive | SMT Case Insensitive | NMT Case Sensitive | NMT Case Insensitive |
+| --- | --- | --- | --- | --- | --- |
+| JRC Acquis | In | 9.94 | 11.29 | 14.03 | 15.61 |
+| JRC Acquis | Out | 8.66 | 10.10 | 12.18 | 13.83 |
+| EMEA | In | 16.52 | 18.54 | x | x |
+| EMEA | Out | 15.24 | 16.75 | x | x |
+
+x=Awaiting final score. To be updated within 24 hours.
 
 ----
 ## FAQ
