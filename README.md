@@ -290,10 +290,11 @@ In-Domain data was processed from the following sources:
 | --- | --- | --- | --- | --- | --- |
 | JRC Acquis | In | 9.94 | 11.29 | 14.03 | 15.61 |
 | JRC Acquis | Out | 8.66 | 10.10 | 12.18 | 13.83 |
-| EMEA | In | 16.52 | 18.54 | x | x |
-| EMEA | Out | 15.24 | 16.75 | x | x |
+| EMEA | In | 14.15 | 15.61 | 18.55 | 19.55 |
+| EMEA | Out | 13.00 | 14.61 | 17.37 | 18.43 |
 
-x=Awaiting final score. To be updated within 24 hours.
+**Conclusion**
+On the deliberately limited subset of 1 million rows, the in-domain data scores better than out-of-domain. Depending on the cut-off point of the in-domain data scores, different results may be achieved. Experimentation on different data sets is required to determine the optimial cut-off point and data sources used as the in-domain sample and pool for each project/domain. This set of measurements shows clearly that in-domain data does provide an improvement in domain-specific translation quality.
 
 ----
 ## FAQ
