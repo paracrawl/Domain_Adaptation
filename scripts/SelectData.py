@@ -16,8 +16,7 @@ Arguments
 import json
 import argparse
 import os
-import sys 
-import logging 
+import sys
 import heapq
 
 #check Python version
