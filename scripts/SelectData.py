@@ -186,7 +186,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	#set the principal paths 
-	pool_data_path = str(args.pool_path)+"/"+lp+"/"
+	pool_data_path = str(args.pool_path)+"/"
 	pool_score_path = str(args.score_path)+"/pool-score/"+lp+"/"
 	domain_score_path = str(args.score_path)+"/"+args.dn+"-score/"+lp+"/"
 	out_path = str(args.out_path)+"/"

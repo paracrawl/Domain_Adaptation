@@ -19,7 +19,7 @@
     - [TrainDomainModel.py](#traindomainmodelpy)
     - [TrainPoolDataModel.py](#trainpooldatamodelpy)
     - [ScorePoolData.py](#scorepooldatapy)
-    - [ExtractMatchedDomainData.py](#extractmatcheddomaindatapy)
+    - [SelectData.py](#selectdatapy)
 - [Comparative BLEU Score Analysis](#comparative-bleu-score-analysis)
 - [FAQ](#FAQ)
 
@@ -137,7 +137,7 @@ The script `FullProcess.py` chains together all the tools in sequence to produce
 
 To run the full process use the following command line:
 ```bash
-FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -domain {domain_sample_data_path} -pool {pool_data_path} -working-dir {temp_directory} -out {domain_match_data_path} [-threshold {extract_score_threshold}] [-ratio {extract_ratio}] -c {config_path}
+FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -domain {domain_sample_data_path} -pool {pool_data_path} -working-dir {temp_directory} -out {domain_match_data_path} [-threshold {extract_score_threshold}] [-ratio {extract_ratio}] -c {config_path} [-output_raw]
 ```
 
 *Arguments*
@@ -150,6 +150,7 @@ FullProcess.py -dn {domain_name} -sl {source_language} -tl {target_language} -do
 - `-out` Directory into which selected data is stored. 
 - `-threshold` This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted.
 - `-ratio` Instead of specifying the threshold, compute it to select a specified ratio of the data
+- `-output_raw` Flag to indicate that output should be raw subsampled pool data, i.e, not tokenized 
 - `-c` (Optional) The path to a user specified configuration file. If not specified, then the default configuration file will be used
 
 The *Pool Data* is usually quite large, so could take a long time to process depending on the size of the data in the pool for the language pair. 
@@ -236,7 +237,7 @@ The trained model will be written to `{data_path}/{domain_name}-model/{source_la
 Scores the *Pool Data* for the specified langauge pair against a specified domain model.
 
 ```sh
-ScorePoolData.py -dn {domain_name} -sl {source_language} -tl {target_language} -dmd {domain_match_data_path}  -c {config_path}
+ScorePoolData.py -dn {domain_name} -sl {source_language} -tl {target_language} -score_path {score_path} -model_path {model_path}  -c {config_path}
 ```
 
 *Arguments*
@@ -247,7 +248,7 @@ ScorePoolData.py -dn {domain_name} -sl {source_language} -tl {target_language} -
 
 ### ExtractMatchedDomainData.py
 ```sh
-ExtractMatchedDomainData.py -dn {domain_name} -sl {source_language} -tl {target_language} -dmd {domain_match_data_path} -est {extract_score_threshold} -c {config_path}
+SelectData.py -dn {domain_name} -sl {source_language} -tl {target_language} -score_path {score_path} -out_path {out_path} -pool_path {pool_path} -threshold {extract_score_threshold} -c {config_path}
 ```
 
 *Arguments*
@@ -255,6 +256,7 @@ ExtractMatchedDomainData.py -dn {domain_name} -sl {source_language} -tl {target_
 - `-sl` The source language that will be used for domain analysis. This should be lower case. For example en, fr, de.
 - `-tl` The target language that will be paired with the source language to determine the path to the language pair in the Pool Data. This should be lower case.
 - `-score_path` Directory that contains scores.
+- `-pool_path` Directory into which pool data is stored.
 - `-out_path` Directory into which selected data is stored. 
 - `-threshold` This value represents the minimum score for data to be extracted with. If the score is greater than or equal to this score, then the line will be extracted.
 - `-ratio` Instead of specifying the threshold, compute it to select a specified ratio of the data

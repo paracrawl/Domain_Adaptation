@@ -47,6 +47,7 @@ if __name__ == '__main__':
 	parser.add_argument('-domain', help='Input domain data.', required=True)
 	parser.add_argument('-pool', help='Input pool data.', required=True)
 	parser.add_argument('-out', help='Selected data.', required=True)
+	parser.add_argument('-output_raw', action='store_true', help='Select non-tokenized pool data.')
 	parser.add_argument('-working_dir', help='Working directory.', required=True)
 	parser.add_argument('-threshold', type=float, help='Threshold for extraction.')
 	parser.add_argument('-ratio', type=float, help='Ratio to extract.')
@@ -149,12 +150,16 @@ if __name__ == '__main__':
 
 
 	# Select Data
+	if args.output_raw:
+		pool_select = args.pool
+	else:
+		pool_select = wdir + "/pool-data/" + sl + "-" + tl + "/"
 	select_cmd = [ curr_path + "/SelectData.py",
 			"-c", config,
 			"-dn", domain_name,
 			"-sl", sl,
 			"-tl", tl,
-			"-pool_path", wdir + "/pool-data/",
+			"-pool_path", pool_select,
 			"-score_path", wdir,
 			"-out_path", out ]
 	if args.threshold:
